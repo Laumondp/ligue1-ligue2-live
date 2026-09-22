@@ -14,8 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ligue 1 · Ligue 2 Live",
-  description: "Équipes, scores en direct et classements automatiques de Ligue 1 et Ligue 2",
+  title: "Foot en direct",
+  description:
+    "Équipes, scores en direct et classements automatiques de Ligue 1, Ligue 2, Premier League, LaLiga, Serie A et Bundesliga",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

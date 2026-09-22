@@ -11,7 +11,7 @@ async function loadTeams() {
   }
 }
 
-export default async function EquipesPage() {
+export default async function FranceEquipesPage() {
   const data = await loadTeams();
 
   if (!data) {
@@ -25,7 +25,12 @@ export default async function EquipesPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">Équipes</h1>
-      <TeamsView ligue1={data.ligue1} ligue2={data.ligue2} />
+      <TeamsView
+        groups={[
+          { key: "ligue1", label: "Ligue 1", teams: data.ligue1 },
+          { key: "ligue2", label: "Ligue 2", teams: data.ligue2 },
+        ]}
+      />
     </div>
   );
 }

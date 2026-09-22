@@ -11,7 +11,7 @@ async function loadStandings() {
   }
 }
 
-export default async function ClassementPage() {
+export default async function FranceClassementPage() {
   const data = await loadStandings();
 
   if (!data) {
@@ -25,7 +25,12 @@ export default async function ClassementPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">Classement</h1>
-      <StandingsView ligue1={data.ligue1} ligue2={data.ligue2} />
+      <StandingsView
+        groups={[
+          { key: "ligue1", label: "Ligue 1", rows: data.ligue1 },
+          { key: "ligue2", label: "Ligue 2", rows: data.ligue2 },
+        ]}
+      />
     </div>
   );
 }
