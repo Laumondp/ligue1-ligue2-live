@@ -9,7 +9,8 @@ Site public avec deux sections à égalité, accueil neutre en entrée :
 Chaque section propose :
 
 - **Équipes** : tous les clubs avec leurs logos.
-- **Direct** : les matchs en cours (rafraîchi automatiquement toutes les 45 s).
+- **Direct** : les matchs en cours (rafraîchi automatiquement toutes les 90 s
+  s'il y a un match en cours, toutes les 10 min sinon).
 - **Classement** : classement automatique.
 
 Les anciennes URLs `/equipes`, `/direct`, `/classement` redirigent vers leurs
@@ -33,15 +34,23 @@ RAPIDAPI_KEY=xxxxxxxx
 
 ## Déploiement
 
-Le projet est déployé sur Vercel via CLI (`npx vercel --prod`). Pas de serveur local :
-toute vérification se fait directement en production après déploiement.
+Le projet est déployé sur Vercel via déploiement Git automatique (push sur
+`master`). Pas de serveur local : toute vérification se fait directement en
+production après déploiement.
 
 ## Limites connues
 
-Le palier gratuit de l'API Sofascore (RapidAPI) est limité à 100 requêtes/jour et
-tolère mal les appels concurrents (429). Les données sont mises en cache côté serveur
-(équipes : 24h, classement : 30 min, buteurs : 6h, direct : 30 s) et les appels
-multi-championnats sont séquentiels pour rester dans ce quota. Avec 10 championnats
-au total, la page `/statistiques` (classements total/domicile/extérieur + buteurs)
-est celle qui consomme le plus de requêtes par cycle de cache ; à surveiller si le
-quota venait à être dépassé.
+Le palier gratuit (Basic, $0/mo) de l'API Sofascore (RapidAPI) est un **hard
+limit de 500 requêtes par MOIS** (pas par jour) — au-delà, l'API bloque
+simplement les appels jusqu'au renouvellement du quota, sans frais. La bande
+passante (10 240 MB/mois inclus, $0.001/MB au-delà) n'est en revanche pas
+plafonnée en dur, mais reste très loin d'être un problème en pratique.
+
+Avec un budget aussi serré, le polling continu est la principale menace : le
+composant `LiveMatches` ne rafraîchit rapidement (90 s) que s'il y a un match
+en cours, et retombe à 10 min d'intervalle sinon. Les autres données sont
+mises en cache côté serveur (équipes : 24h, classement : 30 min, buteurs :
+6h) et les appels multi-championnats sont séquentiels. Avec 10 championnats
+au total, la page `/statistiques` (classements total/domicile/extérieur +
+buteurs) reste celle qui consomme le plus de requêtes par cycle de cache ; à
+surveiller en priorité si le quota venait à être dépassé.

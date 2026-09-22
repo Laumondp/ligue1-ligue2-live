@@ -4,7 +4,13 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import type { Fixture } from "@/lib/football";
 
-const POLL_INTERVAL_MS = 120_000;
+// Le quota RapidAPI est un hard limit de 500 requêtes/MOIS (pas 100/jour comme
+// on le croyait) : un polling fixe, même espacé, épuise le quota en une seule
+// journée si un onglet reste ouvert. On rafraîchit donc vite seulement quand
+// un match est effectivement en cours, et on retombe sur un intervalle très
+// espacé sinon (la majorité du temps).
+const POLL_INTERVAL_LIVE_MS = 90_000;
+const POLL_INTERVAL_IDLE_MS = 10 * 60_000;
 
 export default function LiveMatches({
   apiPath = "/api/live",
@@ -19,8 +25,10 @@ export default function LiveMatches({
 
   useEffect(() => {
     let cancelled = false;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     async function load() {
+      let hasLiveFixtures = false;
       try {
         const res = await fetch(apiPath);
         const data = await res.json();
@@ -31,17 +39,22 @@ export default function LiveMatches({
           setError(null);
           setFixtures(data.fixtures);
           setLastUpdated(new Date());
+          hasLiveFixtures = data.fixtures.length > 0;
         }
       } catch {
         if (!cancelled) setError("Connexion impossible");
       }
+      if (cancelled) return;
+      timeoutId = setTimeout(
+        load,
+        hasLiveFixtures ? POLL_INTERVAL_LIVE_MS : POLL_INTERVAL_IDLE_MS
+      );
     }
 
     load();
-    const interval = setInterval(load, POLL_INTERVAL_MS);
     return () => {
       cancelled = true;
-      clearInterval(interval);
+      clearTimeout(timeoutId);
     };
   }, [apiPath]);
 
