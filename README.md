@@ -1,11 +1,18 @@
-# Ligue 1 · Ligue 2 Live
+# Foot en direct
 
-Site public qui regroupe, pour la France (Ligue 1 / Ligue 2) et pour l'Europe
-(Premier League / LaLiga / Serie A / Bundesliga) :
+Site public avec deux sections à égalité, accueil neutre en entrée :
+
+- **France** (`/france`) : Ligue 1 / Ligue 2.
+- **Europe** (`/europe`) : Premier League / LaLiga / Serie A / Bundesliga.
+
+Chaque section propose :
 
 - **Équipes** : tous les clubs avec leurs logos.
 - **Direct** : les matchs en cours (rafraîchi automatiquement toutes les 45 s).
 - **Classement** : classement automatique.
+
+Les anciennes URLs `/equipes`, `/direct`, `/classement` redirigent vers leurs
+équivalents sous `/france/*`.
 
 ## Stack
 

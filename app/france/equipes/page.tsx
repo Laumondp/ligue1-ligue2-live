@@ -11,7 +11,7 @@ async function loadTeams() {
   }
 }
 
-export default async function EquipesPage() {
+export default async function FranceEquipesPage() {
   const data = await loadTeams();
 
   if (!data) {

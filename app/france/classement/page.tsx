@@ -11,7 +11,7 @@ async function loadStandings() {
   }
 }
 
-export default async function ClassementPage() {
+export default async function FranceClassementPage() {
   const data = await loadStandings();
 
   if (!data) {
