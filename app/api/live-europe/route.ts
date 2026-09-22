@@ -7,6 +7,10 @@ export async function GET() {
       LEAGUES.laliga,
       LEAGUES.serieA,
       LEAGUES.bundesliga,
+      LEAGUES.eredivisie,
+      LEAGUES.portugal,
+      LEAGUES.belgium,
+      LEAGUES.switzerland,
     ]);
     return Response.json({ fixtures });
   } catch (error) {

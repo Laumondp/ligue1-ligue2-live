@@ -6,7 +6,7 @@ export default function EuropeDirectPage() {
       <h1 className="text-2xl font-bold mb-6">Direct</h1>
       <LiveMatches
         apiPath="/api/live-europe"
-        emptyMessage="Aucun match en direct actuellement en Premier League, LaLiga, Serie A ou Bundesliga."
+        emptyMessage="Aucun match en direct actuellement dans les 8 championnats européens."
       />
     </div>
   );

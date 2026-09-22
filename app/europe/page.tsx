@@ -4,7 +4,7 @@ const CARDS = [
   {
     href: "/europe/equipes",
     title: "Équipes",
-    desc: "Tous les clubs de Premier League, LaLiga, Serie A et Bundesliga avec leurs logos.",
+    desc: "Tous les clubs des 8 championnats européens avec leurs logos.",
     icon: "🛡️",
   },
   {
@@ -16,7 +16,7 @@ const CARDS = [
   {
     href: "/europe/classement",
     title: "Classement",
-    desc: "Classement automatique de Premier League, LaLiga, Serie A et Bundesliga.",
+    desc: "Classement automatique des 8 championnats européens.",
     icon: "📊",
   },
 ];

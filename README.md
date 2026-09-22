@@ -3,7 +3,8 @@
 Site public avec deux sections à égalité, accueil neutre en entrée :
 
 - **France** (`/france`) : Ligue 1 / Ligue 2.
-- **Europe** (`/europe`) : Premier League / LaLiga / Serie A / Bundesliga.
+- **Europe** (`/europe`) : Premier League / LaLiga / Serie A / Bundesliga /
+  Eredivisie / Liga Portugal / Pro League (Belgique) / Swiss Super League.
 
 Chaque section propose :
 
@@ -39,5 +40,8 @@ toute vérification se fait directement en production après déploiement.
 
 Le palier gratuit de l'API Sofascore (RapidAPI) est limité à 100 requêtes/jour et
 tolère mal les appels concurrents (429). Les données sont mises en cache côté serveur
-(équipes : 24h, classement : 30 min, direct : 30 s) et les appels multi-championnats
-sont séquentiels pour rester dans ce quota.
+(équipes : 24h, classement : 30 min, buteurs : 6h, direct : 30 s) et les appels
+multi-championnats sont séquentiels pour rester dans ce quota. Avec 10 championnats
+au total, la page `/statistiques` (classements total/domicile/extérieur + buteurs)
+est celle qui consomme le plus de requêtes par cycle de cache ; à surveiller si le
+quota venait à être dépassé.

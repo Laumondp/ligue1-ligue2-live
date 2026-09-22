@@ -7,7 +7,11 @@ async function loadTeams() {
     const laliga = await getTeams(LEAGUES.laliga.tournamentId);
     const serieA = await getTeams(LEAGUES.serieA.tournamentId);
     const bundesliga = await getTeams(LEAGUES.bundesliga.tournamentId);
-    return { premierLeague, laliga, serieA, bundesliga };
+    const eredivisie = await getTeams(LEAGUES.eredivisie.tournamentId);
+    const portugal = await getTeams(LEAGUES.portugal.tournamentId);
+    const belgium = await getTeams(LEAGUES.belgium.tournamentId);
+    const switzerland = await getTeams(LEAGUES.switzerland.tournamentId);
+    return { premierLeague, laliga, serieA, bundesliga, eredivisie, portugal, belgium, switzerland };
   } catch {
     return null;
   }
@@ -33,6 +37,10 @@ export default async function EuropeEquipesPage() {
           { key: "laliga", label: "LaLiga", teams: data.laliga },
           { key: "serieA", label: "Serie A", teams: data.serieA },
           { key: "bundesliga", label: "Bundesliga", teams: data.bundesliga },
+          { key: "eredivisie", label: "Eredivisie", teams: data.eredivisie },
+          { key: "portugal", label: "Liga Portugal", teams: data.portugal },
+          { key: "belgium", label: "Pro League", teams: data.belgium },
+          { key: "switzerland", label: "Swiss Super League", teams: data.switzerland },
         ]}
       />
     </div>

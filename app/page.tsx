@@ -11,7 +11,7 @@ const SECTIONS = [
   {
     href: "/europe",
     title: "Europe",
-    desc: "Premier League, LaLiga, Serie A, Bundesliga : équipes, direct et classement.",
+    desc: "8 championnats européens : équipes, direct et classement.",
     icon: "🌍",
   },
 ];

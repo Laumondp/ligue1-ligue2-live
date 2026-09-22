@@ -12,6 +12,10 @@ const COUNTRIES: Record<string, { label: string; href: string }> = {
   Spain: { label: "LaLiga", href: "/europe" },
   Italy: { label: "Serie A", href: "/europe" },
   Germany: { label: "Bundesliga", href: "/europe" },
+  Netherlands: { label: "Eredivisie", href: "/europe" },
+  Portugal: { label: "Liga Portugal", href: "/europe" },
+  Belgium: { label: "Pro League", href: "/europe" },
+  Switzerland: { label: "Swiss Super League", href: "/europe" },
 };
 
 export default function EuropeMap() {
