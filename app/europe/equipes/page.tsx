@@ -5,7 +5,9 @@ async function loadTeams() {
   try {
     const premierLeague = await getTeams(LEAGUES.premierLeague.tournamentId);
     const laliga = await getTeams(LEAGUES.laliga.tournamentId);
-    return { premierLeague, laliga };
+    const serieA = await getTeams(LEAGUES.serieA.tournamentId);
+    const bundesliga = await getTeams(LEAGUES.bundesliga.tournamentId);
+    return { premierLeague, laliga, serieA, bundesliga };
   } catch {
     return null;
   }
@@ -29,6 +31,8 @@ export default async function EuropeEquipesPage() {
         groups={[
           { key: "premierLeague", label: "Premier League", teams: data.premierLeague },
           { key: "laliga", label: "LaLiga", teams: data.laliga },
+          { key: "serieA", label: "Serie A", teams: data.serieA },
+          { key: "bundesliga", label: "Bundesliga", teams: data.bundesliga },
         ]}
       />
     </div>

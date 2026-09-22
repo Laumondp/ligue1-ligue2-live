@@ -6,6 +6,8 @@ export const LEAGUES = {
   ligue2: { tournamentId: 182, name: "Ligue 2" },
   premierLeague: { tournamentId: 17, name: "Premier League" },
   laliga: { tournamentId: 8, name: "LaLiga" },
+  serieA: { tournamentId: 23, name: "Serie A" },
+  bundesliga: { tournamentId: 35, name: "Bundesliga" },
 } as const;
 
 export type LeagueKey = keyof typeof LEAGUES;

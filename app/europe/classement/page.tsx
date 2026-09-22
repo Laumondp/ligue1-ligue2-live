@@ -5,7 +5,9 @@ async function loadStandings() {
   try {
     const premierLeague = await getStandings(LEAGUES.premierLeague.tournamentId);
     const laliga = await getStandings(LEAGUES.laliga.tournamentId);
-    return { premierLeague, laliga };
+    const serieA = await getStandings(LEAGUES.serieA.tournamentId);
+    const bundesliga = await getStandings(LEAGUES.bundesliga.tournamentId);
+    return { premierLeague, laliga, serieA, bundesliga };
   } catch {
     return null;
   }
@@ -29,6 +31,8 @@ export default async function EuropeClassementPage() {
         groups={[
           { key: "premierLeague", label: "Premier League", rows: data.premierLeague },
           { key: "laliga", label: "LaLiga", rows: data.laliga },
+          { key: "serieA", label: "Serie A", rows: data.serieA },
+          { key: "bundesliga", label: "Bundesliga", rows: data.bundesliga },
         ]}
       />
     </div>

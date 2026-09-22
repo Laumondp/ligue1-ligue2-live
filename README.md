@@ -1,7 +1,7 @@
 # Ligue 1 · Ligue 2 Live
 
 Site public qui regroupe, pour la France (Ligue 1 / Ligue 2) et pour l'Europe
-(Premier League / LaLiga) :
+(Premier League / LaLiga / Serie A / Bundesliga) :
 
 - **Équipes** : tous les clubs avec leurs logos.
 - **Direct** : les matchs en cours (rafraîchi automatiquement toutes les 45 s).

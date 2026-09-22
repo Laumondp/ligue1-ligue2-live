@@ -22,7 +22,7 @@ const CARDS = [
   {
     href: "/europe",
     title: "Europe",
-    desc: "Premier League et LaLiga : équipes, direct et classement.",
+    desc: "Premier League, LaLiga, Serie A, Bundesliga : équipes, direct et classement.",
     icon: "🌍",
   },
 ];

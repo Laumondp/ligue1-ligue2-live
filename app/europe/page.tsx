@@ -4,7 +4,7 @@ const CARDS = [
   {
     href: "/europe/equipes",
     title: "Équipes",
-    desc: "Tous les clubs de Premier League et LaLiga avec leurs logos.",
+    desc: "Tous les clubs de Premier League, LaLiga, Serie A et Bundesliga avec leurs logos.",
     icon: "🛡️",
   },
   {
@@ -16,7 +16,7 @@ const CARDS = [
   {
     href: "/europe/classement",
     title: "Classement",
-    desc: "Classement automatique de Premier League et LaLiga.",
+    desc: "Classement automatique de Premier League, LaLiga, Serie A et Bundesliga.",
     icon: "📊",
   },
 ];
@@ -26,7 +26,7 @@ export default function EuropePage() {
     <div className="flex flex-col gap-8">
       <div className="text-center py-8">
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
-          Premier League & LaLiga en direct
+          Le foot européen en direct
         </h1>
         <p className="mt-3 text-zinc-600 dark:text-zinc-400 max-w-xl mx-auto">
           Équipes, scores en direct et classement automatique, au même endroit.
