@@ -83,11 +83,14 @@ export async function getCurrentSeasonId(tournamentId: number): Promise<number> 
   return seasons[0].id;
 }
 
-export async function getStandings(tournamentId: number): Promise<StandingRow[]> {
+export async function getStandings(
+  tournamentId: number,
+  type: "total" | "home" | "away" = "total"
+): Promise<StandingRow[]> {
   const seasonId = await getCurrentSeasonId(tournamentId);
   const res = await callApi(
     "/tournaments/get-standings",
-    { tournamentId, seasonId, type: "total" },
+    { tournamentId, seasonId, type },
     60 * 30 // 30 min
   );
   if (!res.ok) throw new Error(`Erreur Sofascore (standings): ${res.status}`);
@@ -178,4 +181,146 @@ export async function getLiveFixtures(
     fixtures.push(...(await getLiveEventsForTournament(league.tournamentId, league.name)));
   }
   return fixtures;
+}
+
+export interface TeamRecord {
+  team: SofascoreTeam;
+  leagueLabel: string;
+  matches: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  points: number;
+  pointsPerMatch: number;
+  scoresFor: number;
+  scoresForPerMatch: number;
+  scoresAgainst: number;
+  scoresAgainstPerMatch: number;
+  goalDiffPerMatch: number;
+}
+
+export interface LeagueComparison {
+  bestAttackTotal: TeamRecord[];
+  bestAttackPerMatch: TeamRecord[];
+  bestDefensePerMatch: TeamRecord[];
+  bestForm: TeamRecord[];
+  bestGoalDiff: TeamRecord[];
+  mostWins: TeamRecord[];
+  mostDraws: TeamRecord[];
+  mostLosses: TeamRecord[];
+  bestHome: TeamRecord[];
+  bestAway: TeamRecord[];
+}
+
+function toRecord(row: StandingRow, leagueLabel: string): TeamRecord {
+  return {
+    team: row.team,
+    leagueLabel,
+    matches: row.matches,
+    wins: row.wins,
+    draws: row.draws,
+    losses: row.losses,
+    points: row.points,
+    pointsPerMatch: row.points / row.matches,
+    scoresFor: row.scoresFor,
+    scoresForPerMatch: row.scoresFor / row.matches,
+    scoresAgainst: row.scoresAgainst,
+    scoresAgainstPerMatch: row.scoresAgainst / row.matches,
+    goalDiffPerMatch: (row.scoresFor - row.scoresAgainst) / row.matches,
+  };
+}
+
+// Un championnat en panne (quota, 429...) ne doit pas faire échouer toute la
+// comparaison : on l'ignore simplement et on garde les autres.
+async function getAllRecords(type: "total" | "home" | "away"): Promise<TeamRecord[]> {
+  const records: TeamRecord[] = [];
+  for (const league of Object.values(LEAGUES)) {
+    try {
+      const rows = await getStandings(league.tournamentId, type);
+      records.push(
+        ...rows.filter((row) => row.matches > 0).map((row) => toRecord(row, league.name))
+      );
+    } catch {
+      continue;
+    }
+  }
+  return records;
+}
+
+// Séquentiel (total, puis home, puis away) pour la même raison que
+// getLiveFixtures : le palier gratuit tolère mal les appels concurrents.
+export async function getLeagueComparison(limit = 8): Promise<LeagueComparison> {
+  const total = await getAllRecords("total");
+  const home = await getAllRecords("home");
+  const away = await getAllRecords("away");
+
+  const topBy = (records: TeamRecord[], compare: (a: TeamRecord, b: TeamRecord) => number) =>
+    [...records].sort(compare).slice(0, limit);
+
+  return {
+    bestAttackTotal: topBy(total, (a, b) => b.scoresFor - a.scoresFor),
+    bestAttackPerMatch: topBy(total, (a, b) => b.scoresForPerMatch - a.scoresForPerMatch),
+    bestDefensePerMatch: topBy(total, (a, b) => a.scoresAgainstPerMatch - b.scoresAgainstPerMatch),
+    bestForm: topBy(total, (a, b) => b.pointsPerMatch - a.pointsPerMatch),
+    bestGoalDiff: topBy(total, (a, b) => b.goalDiffPerMatch - a.goalDiffPerMatch),
+    mostWins: topBy(total, (a, b) => b.wins - a.wins),
+    mostDraws: topBy(total, (a, b) => b.draws - a.draws),
+    mostLosses: topBy(total, (a, b) => b.losses - a.losses),
+    bestHome: topBy(home, (a, b) => b.pointsPerMatch - a.pointsPerMatch),
+    bestAway: topBy(away, (a, b) => b.pointsPerMatch - a.pointsPerMatch),
+  };
+}
+
+export interface TopScorer {
+  player: { id: number; name: string };
+  team: SofascoreTeam;
+  leagueLabel: string;
+  goals: number;
+  appearances: number;
+  goalsPerMatch: number;
+}
+
+// Le classement des buteurs par match (forme récente) demanderait un appel par
+// joueur pour son historique récent : bien trop coûteux pour le palier gratuit
+// (une centaine de joueurs à couvrir contre 100 requêtes/jour). On se limite
+// donc au total de buts et au ratio buts/match, déjà fournis par cet appel.
+async function getTopScorersForLeague(
+  tournamentId: number,
+  leagueLabel: string,
+  limit: number
+): Promise<TopScorer[]> {
+  const seasonId = await getCurrentSeasonId(tournamentId);
+  const res = await callApi(
+    "/tournaments/get-top-players",
+    { tournamentId, seasonId, type: "overall" },
+    60 * 60 * 6 // 6h : les buteurs ne changent pas à chaque minute
+  );
+  if (!res.ok) return [];
+  const data = await res.json();
+  const rows: {
+    player: { id: number; name: string };
+    team: { id: number; name: string; shortName: string };
+    statistics: { goals: number; appearances: number };
+  }[] = data.goals ?? [];
+
+  return rows.slice(0, limit).map((row) => ({
+    player: { id: row.player.id, name: row.player.name },
+    team: { id: row.team.id, name: row.team.name, shortName: row.team.shortName },
+    leagueLabel,
+    goals: row.statistics.goals,
+    appearances: row.statistics.appearances,
+    goalsPerMatch: row.statistics.appearances ? row.statistics.goals / row.statistics.appearances : 0,
+  }));
+}
+
+export async function getTopScorersComparison(limit = 15, perLeague = 10): Promise<TopScorer[]> {
+  const all: TopScorer[] = [];
+  for (const league of Object.values(LEAGUES)) {
+    try {
+      all.push(...(await getTopScorersForLeague(league.tournamentId, league.name, perLeague)));
+    } catch {
+      continue;
+    }
+  }
+  return all.sort((a, b) => b.goals - a.goals).slice(0, limit);
 }

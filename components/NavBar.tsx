@@ -7,6 +7,7 @@ const LINKS = [
   { href: "/", label: "Accueil" },
   { href: "/france", label: "France" },
   { href: "/europe", label: "Europe" },
+  { href: "/statistiques", label: "Statistiques" },
 ];
 
 export default function NavBar() {
