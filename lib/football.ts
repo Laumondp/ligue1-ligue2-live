@@ -24,7 +24,8 @@ function delay(ms: number) {
 }
 
 // Le plan gratuit de cette API limite fortement les requêtes concurrentes :
-// on retente avec un court délai en cas de 429 plutôt que d'échouer directement.
+// on retente une seule fois en cas de 429 plutôt que d'insister (chaque retry
+// consomme aussi du quota et aggrave un dépassement déjà en cours).
 async function callApi(
   path: string,
   params: Record<string, string | number>,
@@ -36,7 +37,7 @@ async function callApi(
   const url = `${BASE_URL}${path}?${search.toString()}`;
 
   let res: Response | null = null;
-  for (let attempt = 0; attempt < 6; attempt++) {
+  for (let attempt = 0; attempt < 2; attempt++) {
     res = await fetch(url, {
       headers: headers(),
       next: { revalidate: revalidateSeconds },
@@ -137,7 +138,7 @@ async function getLiveEventsForTournament(tournamentId: number, tournamentName: 
   const res = await callApi(
     "/tournaments/get-live-events",
     { tournamentId },
-    30 // 30 s
+    60 // 60 s
   );
   if (!res.ok) return []; // panne ponctuelle ou quota atteint : on n'affiche rien plutôt qu'une erreur
   const data = await res.json();

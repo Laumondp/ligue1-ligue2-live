@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import type { Fixture } from "@/lib/football";
 
-const POLL_INTERVAL_MS = 45_000;
+const POLL_INTERVAL_MS = 120_000;
 
 export default function LiveMatches() {
   const [fixtures, setFixtures] = useState<Fixture[] | null>(null);
