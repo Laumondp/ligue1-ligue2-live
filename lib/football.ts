@@ -19,6 +19,12 @@ function headers() {
   };
 }
 
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// Le plan gratuit de cette API limite fortement les requêtes concurrentes :
+// on retente avec un court délai en cas de 429 plutôt que d'échouer directement.
 async function callApi(
   path: string,
   params: Record<string, string | number>,
@@ -27,11 +33,18 @@ async function callApi(
   const search = new URLSearchParams(
     Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)]))
   );
+  const url = `${BASE_URL}${path}?${search.toString()}`;
 
-  return fetch(`${BASE_URL}${path}?${search.toString()}`, {
-    headers: headers(),
-    next: { revalidate: revalidateSeconds },
-  });
+  let res: Response | null = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    res = await fetch(url, {
+      headers: headers(),
+      next: { revalidate: revalidateSeconds },
+    });
+    if (res.status !== 429) return res;
+    await delay(500 * (attempt + 1));
+  }
+  return res!;
 }
 
 export interface SofascoreTeam {
@@ -126,9 +139,9 @@ async function getLiveEventsForTournament(tournamentId: number, tournamentName: 
     { tournamentId },
     30 // 30 s
   );
-  if (res.status === 404) return []; // pas de match en direct
-  if (!res.ok) throw new Error(`Erreur Sofascore (live): ${res.status}`);
+  if (!res.ok) return []; // panne ponctuelle ou quota atteint : on n'affiche rien plutôt qu'une erreur
   const data = await res.json();
+  if (data.error) return []; // aucun match en direct sur ce championnat
   const events: {
     id: number;
     startTimestamp: number;
@@ -152,9 +165,7 @@ async function getLiveEventsForTournament(tournamentId: number, tournamentName: 
 }
 
 export async function getLiveFixtures(): Promise<Fixture[]> {
-  const [ligue1, ligue2] = await Promise.all([
-    getLiveEventsForTournament(LEAGUES.ligue1.tournamentId, LEAGUES.ligue1.name),
-    getLiveEventsForTournament(LEAGUES.ligue2.tournamentId, LEAGUES.ligue2.name),
-  ]);
+  const ligue1 = await getLiveEventsForTournament(LEAGUES.ligue1.tournamentId, LEAGUES.ligue1.name);
+  const ligue2 = await getLiveEventsForTournament(LEAGUES.ligue2.tournamentId, LEAGUES.ligue2.name);
   return [...ligue1, ...ligue2];
 }

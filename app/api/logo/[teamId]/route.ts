@@ -10,18 +10,23 @@ export async function GET(
     return new Response("RAPIDAPI_KEY manquante", { status: 500 });
   }
 
-  const res = await fetch(
-    `https://${API_HOST}/teams/get-logo?teamId=${encodeURIComponent(teamId)}`,
-    {
-      headers: {
-        "x-rapidapi-key": apiKey,
-        "x-rapidapi-host": API_HOST,
-      },
-      next: { revalidate: 60 * 60 * 24 * 30 }, // 30 jours, un logo ne change pas
-    }
-  );
+  const url = `https://${API_HOST}/teams/get-logo?teamId=${encodeURIComponent(teamId)}`;
+  const requestHeaders = {
+    "x-rapidapi-key": apiKey,
+    "x-rapidapi-host": API_HOST,
+  };
 
-  if (!res.ok) {
+  let res: Response | null = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    res = await fetch(url, {
+      headers: requestHeaders,
+      next: { revalidate: 60 * 60 * 24 * 30 }, // 30 jours, un logo ne change pas
+    });
+    if (res.status !== 429) break;
+    await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+  }
+
+  if (!res || !res.ok) {
     return new Response("Logo introuvable", { status: 404 });
   }
 

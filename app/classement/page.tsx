@@ -3,10 +3,8 @@ import StandingsView from "@/components/StandingsView";
 
 async function loadStandings() {
   try {
-    const [ligue1, ligue2] = await Promise.all([
-      getStandings(LEAGUES.ligue1.tournamentId),
-      getStandings(LEAGUES.ligue2.tournamentId),
-    ]);
+    const ligue1 = await getStandings(LEAGUES.ligue1.tournamentId);
+    const ligue2 = await getStandings(LEAGUES.ligue2.tournamentId);
     return { ligue1, ligue2 };
   } catch {
     return null;
