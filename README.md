@@ -18,6 +18,9 @@ Les anciennes URLs `/equipes`, `/direct`, `/classement` redirigent vers leurs
 
 - Next.js 16 (App Router) + TypeScript + Tailwind CSS
 - Données fournies par [Sofascore](https://rapidapi.com/apidojo/api/sofascore) (RapidAPI)
+- Carte interactive de l'accueil : [react-simple-maps](https://www.react-simple-maps.io/),
+  frontières chargées depuis le topojson public
+  [world-atlas](https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json)
 
 ## Configuration
 

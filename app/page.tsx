@@ -1,4 +1,5 @@
 import Link from "next/link";
+import EuropeMap from "@/components/EuropeMap";
 
 const SECTIONS = [
   {
@@ -40,6 +41,10 @@ export default function Home() {
             <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{section.desc}</p>
           </Link>
         ))}
+      </div>
+
+      <div className="max-w-2xl mx-auto w-full">
+        <EuropeMap />
       </div>
     </div>
   );
