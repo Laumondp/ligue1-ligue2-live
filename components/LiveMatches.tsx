@@ -65,20 +65,18 @@ export default function LiveMatches() {
       <div className="grid gap-4 sm:grid-cols-2">
         {fixtures.map((f) => (
           <div
-            key={f.fixture.id}
+            key={f.id}
             className="rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-white/5 p-4"
           >
             <div className="flex items-center justify-between text-xs text-zinc-500 mb-3">
-              <span>{f.league.name}</span>
+              <span>{f.tournamentName}</span>
               <span className="flex items-center gap-1 text-red-600 font-semibold">
                 <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
-                {f.fixture.status.elapsed != null
-                  ? `${f.fixture.status.elapsed}'`
-                  : f.fixture.status.short}
+                {f.status.description}
               </span>
             </div>
-            <TeamRow team={f.teams.home} goals={f.goals.home} />
-            <TeamRow team={f.teams.away} goals={f.goals.away} />
+            <TeamRow team={f.homeTeam} goals={f.homeScore} />
+            <TeamRow team={f.awayTeam} goals={f.awayScore} />
           </div>
         ))}
       </div>
@@ -90,15 +88,13 @@ function TeamRow({
   team,
   goals,
 }: {
-  team: { name: string; logo: string };
+  team: { id: number; name: string };
   goals: number | null;
 }) {
   return (
     <div className="flex items-center justify-between py-1">
       <div className="flex items-center gap-2">
-        {team.logo && (
-          <Image src={team.logo} alt={team.name} width={22} height={22} unoptimized />
-        )}
+        <Image src={`/api/logo/${team.id}`} alt={team.name} width={22} height={22} unoptimized />
         <span className="text-sm font-medium">{team.name}</span>
       </div>
       <span className="text-sm font-bold">{goals ?? "-"}</span>

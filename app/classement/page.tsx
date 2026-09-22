@@ -4,8 +4,8 @@ import StandingsView from "@/components/StandingsView";
 async function loadStandings() {
   try {
     const [ligue1, ligue2] = await Promise.all([
-      getStandings(LEAGUES.ligue1.id),
-      getStandings(LEAGUES.ligue2.id),
+      getStandings(LEAGUES.ligue1.tournamentId),
+      getStandings(LEAGUES.ligue2.tournamentId),
     ]);
     return { ligue1, ligue2 };
   } catch {

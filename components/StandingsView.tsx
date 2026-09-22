@@ -47,28 +47,26 @@ export default function StandingsView({
                 key={row.team.id}
                 className="border-t border-black/5 dark:border-white/5"
               >
-                <td className="px-3 py-2 font-medium">{row.rank}</td>
+                <td className="px-3 py-2 font-medium">{row.position}</td>
                 <td className="px-3 py-2">
                   <div className="flex items-center gap-2">
-                    {row.team.logo && (
-                      <Image
-                        src={row.team.logo}
-                        alt={row.team.name}
-                        width={20}
-                        height={20}
-                        unoptimized
-                      />
-                    )}
+                    <Image
+                      src={`/api/logo/${row.team.id}`}
+                      alt={row.team.name}
+                      width={20}
+                      height={20}
+                      unoptimized
+                    />
                     <span className="whitespace-nowrap">{row.team.name}</span>
                   </div>
                 </td>
-                <td className="px-2 py-2 text-center">{row.all.played}</td>
-                <td className="px-2 py-2 text-center">{row.all.win}</td>
-                <td className="px-2 py-2 text-center">{row.all.draw}</td>
-                <td className="px-2 py-2 text-center">{row.all.lose}</td>
-                <td className="px-2 py-2 text-center">{row.all.goals.for}</td>
-                <td className="px-2 py-2 text-center">{row.all.goals.against}</td>
-                <td className="px-2 py-2 text-center">{row.goalsDiff}</td>
+                <td className="px-2 py-2 text-center">{row.matches}</td>
+                <td className="px-2 py-2 text-center">{row.wins}</td>
+                <td className="px-2 py-2 text-center">{row.draws}</td>
+                <td className="px-2 py-2 text-center">{row.losses}</td>
+                <td className="px-2 py-2 text-center">{row.scoresFor}</td>
+                <td className="px-2 py-2 text-center">{row.scoresAgainst}</td>
+                <td className="px-2 py-2 text-center">{row.scoreDiffFormatted}</td>
                 <td className="px-2 py-2 text-center font-semibold">{row.points}</td>
               </tr>
             ))}

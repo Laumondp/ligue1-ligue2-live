@@ -4,8 +4,8 @@ import TeamsView from "@/components/TeamsView";
 async function loadTeams() {
   try {
     const [ligue1, ligue2] = await Promise.all([
-      getTeams(LEAGUES.ligue1.id),
-      getTeams(LEAGUES.ligue2.id),
+      getTeams(LEAGUES.ligue1.tournamentId),
+      getTeams(LEAGUES.ligue2.tournamentId),
     ]);
     return { ligue1, ligue2 };
   } catch {

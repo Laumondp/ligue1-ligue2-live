@@ -1,128 +1,160 @@
-const API_HOST = "api-football-v1.p.rapidapi.com";
-const BASE_URL = `https://${API_HOST}/v3`;
+const API_HOST = "sofascore.p.rapidapi.com";
+const BASE_URL = `https://${API_HOST}`;
 
 export const LEAGUES = {
-  ligue1: { id: 61, name: "Ligue 1" },
-  ligue2: { id: 62, name: "Ligue 2" },
+  ligue1: { tournamentId: 34, name: "Ligue 1" },
+  ligue2: { tournamentId: 182, name: "Ligue 2" },
 } as const;
 
 export type LeagueKey = keyof typeof LEAGUES;
 
-export function getCurrentSeason(): number {
-  const now = new Date();
-  const month = now.getMonth() + 1; // 1-12
-  const year = now.getFullYear();
-  return month >= 7 ? year : year - 1;
-}
-
-async function callApi<T>(
-  path: string,
-  params: Record<string, string | number>,
-  revalidateSeconds: number
-): Promise<T> {
+function headers() {
   const apiKey = process.env.RAPIDAPI_KEY;
   if (!apiKey) {
     throw new Error("RAPIDAPI_KEY manquante dans les variables d'environnement");
   }
+  return {
+    "x-rapidapi-key": apiKey,
+    "x-rapidapi-host": API_HOST,
+  };
+}
 
+async function callApi(
+  path: string,
+  params: Record<string, string | number>,
+  revalidateSeconds: number
+): Promise<Response> {
   const search = new URLSearchParams(
     Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)]))
   );
 
-  const res = await fetch(`${BASE_URL}${path}?${search.toString()}`, {
-    headers: {
-      "x-rapidapi-key": apiKey,
-      "x-rapidapi-host": API_HOST,
-    },
+  return fetch(`${BASE_URL}${path}?${search.toString()}`, {
+    headers: headers(),
     next: { revalidate: revalidateSeconds },
   });
-
-  if (!res.ok) {
-    throw new Error(`Erreur API-Football (${path}): ${res.status}`);
-  }
-
-  const json = await res.json();
-  return json.response as T;
 }
 
-export interface Team {
-  team: {
-    id: number;
-    name: string;
-    code: string | null;
-    country: string;
-    founded: number | null;
-    logo: string;
-  };
-  venue: {
-    name: string | null;
-    city: string | null;
-  };
-}
-
-export async function getTeams(leagueId: number): Promise<Team[]> {
-  return callApi<Team[]>(
-    "/teams",
-    { league: leagueId, season: getCurrentSeason() },
-    60 * 60 * 24 // 24h : la composition des championnats change rarement
-  );
+export interface SofascoreTeam {
+  id: number;
+  name: string;
+  shortName: string;
 }
 
 export interface StandingRow {
-  rank: number;
-  team: { id: number; name: string; logo: string };
+  position: number;
+  team: SofascoreTeam;
   points: number;
-  goalsDiff: number;
-  form: string | null;
-  status: string;
-  description: string | null;
-  all: {
-    played: number;
-    win: number;
-    draw: number;
-    lose: number;
-    goals: { for: number; against: number };
-  };
+  matches: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  scoresFor: number;
+  scoresAgainst: number;
+  scoreDiffFormatted: string;
 }
 
-interface StandingsResponse {
-  league: {
-    id: number;
-    name: string;
-    season: number;
-    standings: StandingRow[][];
-  };
+export async function getCurrentSeasonId(tournamentId: number): Promise<number> {
+  const res = await callApi(
+    "/tournaments/get-seasons",
+    { tournamentId },
+    60 * 60 * 24 // 24h
+  );
+  if (!res.ok) throw new Error(`Erreur Sofascore (seasons): ${res.status}`);
+  const data = await res.json();
+  const seasons: { id: number }[] = data.seasons ?? [];
+  if (seasons.length === 0) throw new Error("Aucune saison trouvée");
+  return seasons[0].id;
 }
 
-export async function getStandings(leagueId: number): Promise<StandingRow[]> {
-  const data = await callApi<StandingsResponse[]>(
-    "/standings",
-    { league: leagueId, season: getCurrentSeason() },
+export async function getStandings(tournamentId: number): Promise<StandingRow[]> {
+  const seasonId = await getCurrentSeasonId(tournamentId);
+  const res = await callApi(
+    "/tournaments/get-standings",
+    { tournamentId, seasonId, type: "total" },
     60 * 30 // 30 min
   );
-  return data[0]?.league.standings[0] ?? [];
+  if (!res.ok) throw new Error(`Erreur Sofascore (standings): ${res.status}`);
+  const data = await res.json();
+  const rows = data.standings?.[0]?.rows ?? [];
+
+  return rows.map((row: {
+    position: number;
+    team: { id: number; name: string; shortName: string };
+    points: number;
+    matches: number;
+    wins: number;
+    draws: number;
+    losses: number;
+    scoresFor: number;
+    scoresAgainst: number;
+    scoreDiffFormatted: string;
+  }) => ({
+    position: row.position,
+    team: { id: row.team.id, name: row.team.name, shortName: row.team.shortName },
+    points: row.points,
+    matches: row.matches,
+    wins: row.wins,
+    draws: row.draws,
+    losses: row.losses,
+    scoresFor: row.scoresFor,
+    scoresAgainst: row.scoresAgainst,
+    scoreDiffFormatted: row.scoreDiffFormatted,
+  }));
+}
+
+export async function getTeams(tournamentId: number): Promise<SofascoreTeam[]> {
+  const standings = await getStandings(tournamentId);
+  return standings
+    .map((row) => row.team)
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export interface Fixture {
-  fixture: {
+  id: number;
+  tournamentName: string;
+  status: { type: string; description: string };
+  startTimestamp: number;
+  homeTeam: SofascoreTeam;
+  awayTeam: SofascoreTeam;
+  homeScore: number | null;
+  awayScore: number | null;
+}
+
+async function getLiveEventsForTournament(tournamentId: number, tournamentName: string): Promise<Fixture[]> {
+  const res = await callApi(
+    "/tournaments/get-live-events",
+    { tournamentId },
+    30 // 30 s
+  );
+  if (res.status === 404) return []; // pas de match en direct
+  if (!res.ok) throw new Error(`Erreur Sofascore (live): ${res.status}`);
+  const data = await res.json();
+  const events: {
     id: number;
-    date: string;
-    status: { long: string; short: string; elapsed: number | null };
-  };
-  league: { id: number; name: string; round: string };
-  teams: {
-    home: { id: number; name: string; logo: string; winner: boolean | null };
-    away: { id: number; name: string; logo: string; winner: boolean | null };
-  };
-  goals: { home: number | null; away: number | null };
+    startTimestamp: number;
+    status: { type: string; description: string };
+    homeTeam: { id: number; name: string; shortName: string };
+    awayTeam: { id: number; name: string; shortName: string };
+    homeScore?: { current?: number };
+    awayScore?: { current?: number };
+  }[] = data.events ?? [];
+
+  return events.map((e) => ({
+    id: e.id,
+    tournamentName,
+    status: e.status,
+    startTimestamp: e.startTimestamp,
+    homeTeam: { id: e.homeTeam.id, name: e.homeTeam.name, shortName: e.homeTeam.shortName },
+    awayTeam: { id: e.awayTeam.id, name: e.awayTeam.name, shortName: e.awayTeam.shortName },
+    homeScore: e.homeScore?.current ?? null,
+    awayScore: e.awayScore?.current ?? null,
+  }));
 }
 
 export async function getLiveFixtures(): Promise<Fixture[]> {
-  const all = await callApi<Fixture[]>(
-    "/fixtures",
-    { live: "all" },
-    30 // 30 s
-  );
-  const leagueIds = new Set<number>([LEAGUES.ligue1.id, LEAGUES.ligue2.id]);
-  return all.filter((f) => leagueIds.has(f.league.id));
+  const [ligue1, ligue2] = await Promise.all([
+    getLiveEventsForTournament(LEAGUES.ligue1.tournamentId, LEAGUES.ligue1.name),
+    getLiveEventsForTournament(LEAGUES.ligue2.tournamentId, LEAGUES.ligue2.name),
+  ]);
+  return [...ligue1, ...ligue2];
 }

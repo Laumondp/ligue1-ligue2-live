@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import type { Team } from "@/lib/football";
+import type { SofascoreTeam } from "@/lib/football";
 
 export default function TeamsView({
   ligue1,
   ligue2,
 }: {
-  ligue1: Team[];
-  ligue2: Team[];
+  ligue1: SofascoreTeam[];
+  ligue2: SofascoreTeam[];
 }) {
   const [tab, setTab] = useState<"ligue1" | "ligue2">("ligue1");
   const teams = tab === "ligue1" ? ligue1 : ligue2;
@@ -26,20 +26,18 @@ export default function TeamsView({
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-        {teams.map(({ team }) => (
+        {teams.map((team) => (
           <div
             key={team.id}
             className="flex flex-col items-center gap-2 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-white/5 p-4 text-center"
           >
-            {team.logo && (
-              <Image
-                src={team.logo}
-                alt={team.name}
-                width={48}
-                height={48}
-                unoptimized
-              />
-            )}
+            <Image
+              src={`/api/logo/${team.id}`}
+              alt={team.name}
+              width={48}
+              height={48}
+              unoptimized
+            />
             <span className="text-sm font-medium">{team.name}</span>
           </div>
         ))}
