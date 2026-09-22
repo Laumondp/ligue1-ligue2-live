@@ -3,15 +3,15 @@ import StandingsView from "@/components/StandingsView";
 
 async function loadStandings() {
   try {
-    const ligue1 = await getStandings(LEAGUES.ligue1.tournamentId);
-    const ligue2 = await getStandings(LEAGUES.ligue2.tournamentId);
-    return { ligue1, ligue2 };
+    const premierLeague = await getStandings(LEAGUES.premierLeague.tournamentId);
+    const laliga = await getStandings(LEAGUES.laliga.tournamentId);
+    return { premierLeague, laliga };
   } catch {
     return null;
   }
 }
 
-export default async function ClassementPage() {
+export default async function EuropeClassementPage() {
   const data = await loadStandings();
 
   if (!data) {
@@ -27,8 +27,8 @@ export default async function ClassementPage() {
       <h1 className="text-2xl font-bold mb-6">Classement</h1>
       <StandingsView
         groups={[
-          { key: "ligue1", label: "Ligue 1", rows: data.ligue1 },
-          { key: "ligue2", label: "Ligue 2", rows: data.ligue2 },
+          { key: "premierLeague", label: "Premier League", rows: data.premierLeague },
+          { key: "laliga", label: "LaLiga", rows: data.laliga },
         ]}
       />
     </div>

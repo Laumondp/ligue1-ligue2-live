@@ -6,7 +6,13 @@ import type { Fixture } from "@/lib/football";
 
 const POLL_INTERVAL_MS = 45_000;
 
-export default function LiveMatches() {
+export default function LiveMatches({
+  apiPath = "/api/live",
+  emptyMessage = "Aucun match en direct actuellement en Ligue 1 ou Ligue 2.",
+}: {
+  apiPath?: string;
+  emptyMessage?: string;
+}) {
   const [fixtures, setFixtures] = useState<Fixture[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -16,7 +22,7 @@ export default function LiveMatches() {
 
     async function load() {
       try {
-        const res = await fetch("/api/live");
+        const res = await fetch(apiPath);
         const data = await res.json();
         if (cancelled) return;
         if (data.error) {
@@ -37,7 +43,7 @@ export default function LiveMatches() {
       cancelled = true;
       clearInterval(interval);
     };
-  }, []);
+  }, [apiPath]);
 
   if (error) {
     return <div className="text-center text-zinc-500 py-16">{error}</div>;
@@ -50,7 +56,7 @@ export default function LiveMatches() {
   if (fixtures.length === 0) {
     return (
       <div className="text-center text-zinc-500 py-16">
-        Aucun match en direct actuellement en Ligue 1 ou Ligue 2.
+        {emptyMessage}
       </div>
     );
   }

@@ -4,6 +4,8 @@ const BASE_URL = `https://${API_HOST}`;
 export const LEAGUES = {
   ligue1: { tournamentId: 34, name: "Ligue 1" },
   ligue2: { tournamentId: 182, name: "Ligue 2" },
+  premierLeague: { tournamentId: 17, name: "Premier League" },
+  laliga: { tournamentId: 8, name: "LaLiga" },
 } as const;
 
 export type LeagueKey = keyof typeof LEAGUES;
@@ -164,8 +166,14 @@ async function getLiveEventsForTournament(tournamentId: number, tournamentName: 
   }));
 }
 
-export async function getLiveFixtures(): Promise<Fixture[]> {
-  const ligue1 = await getLiveEventsForTournament(LEAGUES.ligue1.tournamentId, LEAGUES.ligue1.name);
-  const ligue2 = await getLiveEventsForTournament(LEAGUES.ligue2.tournamentId, LEAGUES.ligue2.name);
-  return [...ligue1, ...ligue2];
+// Appels séquentiels (pas de Promise.all) : le palier gratuit de l'API tolère mal
+// les requêtes concurrentes, cf. historique des 429 sur cette fonction.
+export async function getLiveFixtures(
+  leagues: { tournamentId: number; name: string }[]
+): Promise<Fixture[]> {
+  const fixtures: Fixture[] = [];
+  for (const league of leagues) {
+    fixtures.push(...(await getLiveEventsForTournament(league.tournamentId, league.name)));
+  }
+  return fixtures;
 }

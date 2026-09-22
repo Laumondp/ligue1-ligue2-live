@@ -3,15 +3,15 @@ import TeamsView from "@/components/TeamsView";
 
 async function loadTeams() {
   try {
-    const ligue1 = await getTeams(LEAGUES.ligue1.tournamentId);
-    const ligue2 = await getTeams(LEAGUES.ligue2.tournamentId);
-    return { ligue1, ligue2 };
+    const premierLeague = await getTeams(LEAGUES.premierLeague.tournamentId);
+    const laliga = await getTeams(LEAGUES.laliga.tournamentId);
+    return { premierLeague, laliga };
   } catch {
     return null;
   }
 }
 
-export default async function EquipesPage() {
+export default async function EuropeEquipesPage() {
   const data = await loadTeams();
 
   if (!data) {
@@ -27,8 +27,8 @@ export default async function EquipesPage() {
       <h1 className="text-2xl font-bold mb-6">Équipes</h1>
       <TeamsView
         groups={[
-          { key: "ligue1", label: "Ligue 1", teams: data.ligue1 },
-          { key: "ligue2", label: "Ligue 2", teams: data.ligue2 },
+          { key: "premierLeague", label: "Premier League", teams: data.premierLeague },
+          { key: "laliga", label: "LaLiga", teams: data.laliga },
         ]}
       />
     </div>

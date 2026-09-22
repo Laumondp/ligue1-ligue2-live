@@ -4,25 +4,24 @@ import { useState } from "react";
 import Image from "next/image";
 import type { SofascoreTeam } from "@/lib/football";
 
-export default function TeamsView({
-  ligue1,
-  ligue2,
-}: {
-  ligue1: SofascoreTeam[];
-  ligue2: SofascoreTeam[];
-}) {
-  const [tab, setTab] = useState<"ligue1" | "ligue2">("ligue1");
-  const teams = tab === "ligue1" ? ligue1 : ligue2;
+export interface TeamsGroup {
+  key: string;
+  label: string;
+  teams: SofascoreTeam[];
+}
+
+export default function TeamsView({ groups }: { groups: TeamsGroup[] }) {
+  const [tab, setTab] = useState(groups[0]?.key);
+  const teams = groups.find((g) => g.key === tab)?.teams ?? [];
 
   return (
     <div>
       <div className="flex gap-2 mb-6">
-        <TabButton active={tab === "ligue1"} onClick={() => setTab("ligue1")}>
-          Ligue 1
-        </TabButton>
-        <TabButton active={tab === "ligue2"} onClick={() => setTab("ligue2")}>
-          Ligue 2
-        </TabButton>
+        {groups.map((group) => (
+          <TabButton key={group.key} active={tab === group.key} onClick={() => setTab(group.key)}>
+            {group.label}
+          </TabButton>
+        ))}
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">

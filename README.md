@@ -1,15 +1,16 @@
 # Ligue 1 · Ligue 2 Live
 
-Site public qui regroupe :
+Site public qui regroupe, pour la France (Ligue 1 / Ligue 2) et pour l'Europe
+(Premier League / LaLiga) :
 
-- **Équipes** : tous les clubs de Ligue 1 et Ligue 2 avec leurs logos.
+- **Équipes** : tous les clubs avec leurs logos.
 - **Direct** : les matchs en cours (rafraîchi automatiquement toutes les 45 s).
-- **Classement** : classement automatique de Ligue 1 et Ligue 2.
+- **Classement** : classement automatique.
 
 ## Stack
 
 - Next.js 16 (App Router) + TypeScript + Tailwind CSS
-- Données fournies par [API-Football](https://rapidapi.com/api-sports/api/api-football) (RapidAPI)
+- Données fournies par [Sofascore](https://rapidapi.com/apidojo/api/sofascore) (RapidAPI)
 
 ## Configuration
 
@@ -26,6 +27,7 @@ toute vérification se fait directement en production après déploiement.
 
 ## Limites connues
 
-Le palier gratuit d'API-Football est limité à 100 requêtes/jour. Les données sont mises
-en cache côté serveur (équipes : 24h, classement : 30 min, direct : 30 s) pour rester
-dans ce quota.
+Le palier gratuit de l'API Sofascore (RapidAPI) est limité à 100 requêtes/jour et
+tolère mal les appels concurrents (429). Les données sont mises en cache côté serveur
+(équipes : 24h, classement : 30 min, direct : 30 s) et les appels multi-championnats
+sont séquentiels pour rester dans ce quota.

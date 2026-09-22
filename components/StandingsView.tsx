@@ -4,25 +4,24 @@ import { useState } from "react";
 import Image from "next/image";
 import type { StandingRow } from "@/lib/football";
 
-export default function StandingsView({
-  ligue1,
-  ligue2,
-}: {
-  ligue1: StandingRow[];
-  ligue2: StandingRow[];
-}) {
-  const [tab, setTab] = useState<"ligue1" | "ligue2">("ligue1");
-  const rows = tab === "ligue1" ? ligue1 : ligue2;
+export interface StandingsGroup {
+  key: string;
+  label: string;
+  rows: StandingRow[];
+}
+
+export default function StandingsView({ groups }: { groups: StandingsGroup[] }) {
+  const [tab, setTab] = useState(groups[0]?.key);
+  const rows = groups.find((g) => g.key === tab)?.rows ?? [];
 
   return (
     <div>
       <div className="flex gap-2 mb-6">
-        <TabButton active={tab === "ligue1"} onClick={() => setTab("ligue1")}>
-          Ligue 1
-        </TabButton>
-        <TabButton active={tab === "ligue2"} onClick={() => setTab("ligue2")}>
-          Ligue 2
-        </TabButton>
+        {groups.map((group) => (
+          <TabButton key={group.key} active={tab === group.key} onClick={() => setTab(group.key)}>
+            {group.label}
+          </TabButton>
+        ))}
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-black/10 dark:border-white/10">
