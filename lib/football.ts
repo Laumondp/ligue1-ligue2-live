@@ -301,7 +301,7 @@ async function getTopScorersForLeague(
     player: { id: number; name: string };
     team: { id: number; name: string; shortName: string };
     statistics: { goals: number; appearances: number };
-  }[] = data.goals ?? [];
+  }[] = data.topPlayers?.goals ?? [];
 
   return rows.slice(0, limit).map((row) => ({
     player: { id: row.player.id, name: row.player.name },
