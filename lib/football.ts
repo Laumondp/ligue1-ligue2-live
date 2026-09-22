@@ -36,13 +36,13 @@ async function callApi(
   const url = `${BASE_URL}${path}?${search.toString()}`;
 
   let res: Response | null = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
+  for (let attempt = 0; attempt < 6; attempt++) {
     res = await fetch(url, {
       headers: headers(),
       next: { revalidate: revalidateSeconds },
     });
     if (res.status !== 429) return res;
-    await delay(500 * (attempt + 1));
+    await delay(1000 * (attempt + 1));
   }
   return res!;
 }

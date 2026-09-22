@@ -17,13 +17,13 @@ export async function GET(
   };
 
   let res: Response | null = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
+  for (let attempt = 0; attempt < 6; attempt++) {
     res = await fetch(url, {
       headers: requestHeaders,
       next: { revalidate: 60 * 60 * 24 * 30 }, // 30 jours, un logo ne change pas
     });
     if (res.status !== 429) break;
-    await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+    await new Promise((resolve) => setTimeout(resolve, 1000 * (attempt + 1)));
   }
 
   if (!res || !res.ok) {
