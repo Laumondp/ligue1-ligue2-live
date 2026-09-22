@@ -48,7 +48,8 @@ plafonnée en dur, mais reste très loin d'être un problème en pratique.
 
 Avec un budget aussi serré, le polling continu est la principale menace : le
 composant `LiveMatches` ne rafraîchit rapidement (90 s) que s'il y a un match
-en cours, et retombe à 10 min d'intervalle sinon. Les autres données sont
+en cours, retombe à 10 min d'intervalle en journée sans match, et à 2h la
+nuit (minuit-11h, aucun match européen à ces heures). Les autres données sont
 mises en cache côté serveur (équipes : 24h, classement : 30 min, buteurs :
 6h) et les appels multi-championnats sont séquentiels. Avec 10 championnats
 au total, la page `/statistiques` (classements total/domicile/extérieur +

@@ -7,10 +7,17 @@ import type { Fixture } from "@/lib/football";
 // Le quota RapidAPI est un hard limit de 500 requêtes/MOIS (pas 100/jour comme
 // on le croyait) : un polling fixe, même espacé, épuise le quota en une seule
 // journée si un onglet reste ouvert. On rafraîchit donc vite seulement quand
-// un match est effectivement en cours, et on retombe sur un intervalle très
-// espacé sinon (la majorité du temps).
+// un match est effectivement en cours, on espace fortement sinon, et on
+// coupe presque totalement le polling la nuit (aucun match européen ne se
+// joue entre minuit et 11h).
 const POLL_INTERVAL_LIVE_MS = 90_000;
 const POLL_INTERVAL_IDLE_MS = 10 * 60_000;
+const POLL_INTERVAL_OVERNIGHT_MS = 2 * 60 * 60_000;
+
+function isPlausibleMatchWindow(date: Date): boolean {
+  const hour = date.getHours();
+  return hour >= 11 && hour < 24;
+}
 
 export default function LiveMatches({
   apiPath = "/api/live",
@@ -45,10 +52,12 @@ export default function LiveMatches({
         if (!cancelled) setError("Connexion impossible");
       }
       if (cancelled) return;
-      timeoutId = setTimeout(
-        load,
-        hasLiveFixtures ? POLL_INTERVAL_LIVE_MS : POLL_INTERVAL_IDLE_MS
-      );
+      const nextDelay = hasLiveFixtures
+        ? POLL_INTERVAL_LIVE_MS
+        : isPlausibleMatchWindow(new Date())
+          ? POLL_INTERVAL_IDLE_MS
+          : POLL_INTERVAL_OVERNIGHT_MS;
+      timeoutId = setTimeout(load, nextDelay);
     }
 
     load();
